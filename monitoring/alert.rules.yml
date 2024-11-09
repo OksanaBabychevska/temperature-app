@@ -1,0 +1,21 @@
+groups:
+  - name: example_alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: process_cpu_seconds_total{job="temperature_app"} > 0.5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU Usage"
+          description: "CPU usage has been above 50% for more than 1 minute."
+      
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes{job="temperature_app"} > 2e+07
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High Memory Usage"
+          description: "Memory usage has been above 20 MB for more than 1 minute."
+
