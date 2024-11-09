@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'temperature_app'
-        REPO_URL = 'https://github.com/OksanaBabychevska/panda-py'
+        REPO_URL = 'https://github.com/OksanaBabychevska/temperature-app'
         CONTAINER_NAME = 'temperature_app' 
     }
 
@@ -65,11 +65,11 @@ pipeline {
             }
             steps {
                 script {
-                    // Deploy to production using the production docker-compose file
+                    
                     if (isUnix()) {
-                        sh 'docker-compose up -d'  // Linux command
+                        sh 'docker-compose up -d'
                     } else {
-                        bat 'docker-compose up -d'  // Windows command
+                        bat 'docker-compose up -d'
                     }
                 }
             }
