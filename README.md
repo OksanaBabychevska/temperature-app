@@ -21,7 +21,7 @@ In this README, we will outline all the steps involved in setting up this infras
    - [Prometheus Setup](#prometheus-setup)
    - [Grafana Setup](#grafana-setup)
 4. [Application](#application)
-
+5. [Webhook](#webhook)
 ## Dockerizing the Application
 
 This project involves running three containers and one test container:
@@ -146,3 +146,39 @@ Look at the Documentation/grafana(1-5).png
 ## Application
 
  Open your web browser and navigate to **http://localhost:5000** (default app URL).Look at the Documents/app.png
+
+## Webhook
+1. Install GitHub Plugin (if not installed)
+First, make sure you have the GitHub plugin installed on Jenkins to integrate GitHub with Jenkins. Here's how to do that:
+
+Navigate to Jenkins > Manage Jenkins > Manage Plugins.
+Under the Available tab, search for GitHub Plugin.
+Install the plugin and restart Jenkins.
+
+2. Configure GitHub Integration in Jenkins
+Go to Jenkins > Manage Jenkins > Configure System.
+Find the GitHub section under the GitHub Servers section.
+Add a new GitHub server:
+GitHub API URL: https://api.github.com
+Credentials: Add GitHub credentials if they are not already configured (you will need a GitHub token to authenticate).
+
+3. Set Up a Webhook in GitHub
+Now, set up a webhook in your GitHub repository that will notify Jenkins of any pull requests.
+Go to your GitHub repository.
+Click on Settings > Webhooks.
+Click Add webhook.
+In the Payload URL field, enter the Jenkins URL to trigger builds, e.g., http://<jenkins-server>/github-webhook/.
+Set the Content type to application/json.
+Select Let me select individual events and check Pull requests.
+Make sure the Active box is checked and click Add webhook.
+
+4. Configure Jenkins Job to Listen to GitHub Events
+In your Jenkins pipeline job configuration, add a trigger for GitHub events. Follow these steps:
+
+Go to Jenkins > Your Job > Configure.
+In the Build Triggers section, check GitHub hook trigger for GITScm polling.
+This will allow Jenkins to listen for GitHub webhook events (like pull requests) and trigger the build automatically.
+
+
+5. Update Your Jenkinsfile (Optional)
+
