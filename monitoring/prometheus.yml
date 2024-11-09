@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s  
+
+scrape_configs:
+  - job_name: 'temperature_app' 
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['temperature_app:8000'] 
+     
+rule_files:
+  - '/etc/prometheus/alert.rules.yml' 
+
