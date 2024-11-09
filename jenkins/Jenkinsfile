@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'temperature_app'
+        REPO_URL = 'https://github.com/OksanaBabychevska/panda-py'
+        CONTAINER_NAME = 'temperature_app' 
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: 'main']], 
+                    userRemoteConfigs: [[url: REPO_URL]])
+            }
+        }
+        stage('Stop Existing Containers') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'docker-compose down --volumes --remove-orphans' 
+                        sh 'docker rmi $(docker images -q) || true'
+                    } else {
+                        bat 'docker-compose down --volumes --remove-orphans' 
+                        bat '''
+                            for /f "tokens=*" %%i in ('docker images -q') do docker rmi %%i
+                            '''  
+                    }
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh "docker build -t ${DOCKER_IMAGE} ."  
+                    } else {
+                        bat "docker build -t ${DOCKER_IMAGE} ."
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                script {
+                    catchError(stageResult: 'FAILURE') {
+                        if (isUnix()) {
+                               sh "docker run -d --name test-container ${DOCKER_IMAGE}"
+                               sh "docker exec test-container python /app/tests/test_app.py"
+                               sh "docker stop test-container"
+                            } else {
+                                bat "docker run -d --name test-container ${DOCKER_IMAGE}"
+                                bat "docker exec test-container python /app/tests/test_app.py"
+                                bat "docker stop test-container"
+                        } 
+                            }
+                    }
+                }
+            }
+
+        stage('Deploy to Production') {
+            when {
+                expression { return currentBuild.currentResult == 'SUCCESS' }
+            }
+            steps {
+                script {
+                    // Deploy to production using the production docker-compose file
+                    if (isUnix()) {
+                        sh 'docker-compose up -d'  // Linux command
+                    } else {
+                        bat 'docker-compose up -d'  // Windows command
+                    }
+                }
+            }
+        }
+    }
+}
